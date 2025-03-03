@@ -7,7 +7,7 @@ import {
   RectangleStackIcon,
   ChartBarIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Tables, Notifications } from "@/pages/dashboard";
+import { Home, Profile, Tables, Notifications, Analytics } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
 
 const icon = {
@@ -30,7 +30,7 @@ export const routes = [
         icon: <ChartBarIcon {...icon} />,
         name: "Analytics",
         path: "/analytics",
-        element:  <Home />,
+        element:  <Analytics />,
       },
       // Consumption Alerts
       {
