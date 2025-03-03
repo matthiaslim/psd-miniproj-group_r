@@ -41,6 +41,9 @@ export function Analytics() {
               chart: {
                 ...chartsConfig.chart,
                 background: "#ffffff",
+                toolbar: {
+                    show: true,
+                }
               },
               stroke: {
                 lineCap: "round"
