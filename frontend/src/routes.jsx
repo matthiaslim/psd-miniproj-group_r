@@ -5,6 +5,7 @@ import {
   InformationCircleIcon,
   ServerStackIcon,
   RectangleStackIcon,
+  ChartBarIcon,
 } from "@heroicons/react/24/solid";
 import { Home, Profile, Tables, Notifications } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
@@ -17,12 +18,28 @@ export const routes = [
   {
     layout: "dashboard",
     pages: [
+      // Resource Consumption Dashboard
       {
         icon: <HomeIcon {...icon} />,
         name: "dashboard",
         path: "/home",
         element: <Home />,
       },
+      // Resource Analytics
+      {
+        icon: <ChartBarIcon {...icon} />,
+        name: "Analytics",
+        path: "/analytics",
+        element:  <Home />,
+      },
+      // Consumption Alerts
+      {
+        icon: <InformationCircleIcon {...icon} />,
+        name: "Alerts",
+        path: "/alerts",
+        element: <Notifications />,
+      },
+      // User Profile & Preferences
       {
         icon: <UserCircleIcon {...icon} />,
         name: "profile",
@@ -34,12 +51,6 @@ export const routes = [
         name: "tables",
         path: "/tables",
         element: <Tables />,
-      },
-      {
-        icon: <InformationCircleIcon {...icon} />,
-        name: "notifications",
-        path: "/notifications",
-        element: <Notifications />,
       },
     ],
   },

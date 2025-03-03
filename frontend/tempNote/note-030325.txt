@@ -1,0 +1,40 @@
+
+Login/Authentication Page
+
+Simple login form for user authentication
+Basic registration option if needed
+
+
+Main Dashboard Page
+
+Overview of all key metrics
+Summary KPI cards for energy, water, and material consumption
+Quick alerts section
+High-level trend visualizations
+
+
+Detailed Resource Analysis Page
+
+In-depth analysis of each resource type
+Filtering options (by time period, department, etc.)
+More detailed charts and comparisons
+This could be a single page with tabs for each resource type (energy, water, materials)
+
+
+Alerts & Notifications Page
+
+Complete list of current and past alerts
+Threshold management
+Alert settings and preferences
+
+
+User Profile/Settings Page
+
+User information
+Notification preferences
+Company profile information
+Dashboard customization options
+
+
+
+This 5-page structure would cover all the essential functionality required by the project specifications while keeping the scope manageable for a mini-project. Each page serves a specific purpose and addresses different aspects of the user requirements outlined in the document.
