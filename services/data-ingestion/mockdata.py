@@ -1,13 +1,14 @@
 import paho.mqtt.client as mqtt
 import random
 import time
+import os
 
-BROKER = "localhost"  
+BROKER = os.getenv("BROKER", "localhost")
 TOPIC_ELEC = "sensor/electricity"
 TOPIC_WATER = "sensor/water"
 
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-client.connect(BROKER, 1883, 60)
+client.connect(BROKER, 1883, 200)
 
 try:
     while True:

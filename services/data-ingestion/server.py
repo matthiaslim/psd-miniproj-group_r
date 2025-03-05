@@ -1,13 +1,15 @@
 import paho.mqtt.client as mqtt
 import pymysql
 from datetime import datetime
+import cryptography
+import os
 
-DB_HOST = "localhost"
-DB_USER = "root"
-DB_PASS = "admin"
-DB_NAME = "sensor_data"
+DB_HOST = os.getenv("DB_HOST", "mysql")
+DB_USER = os.getenv("DB_USER", "root")
+DB_PASS = os.getenv("DB_PASS", "admin")
+DB_NAME = os.getenv("DB_NAME", "sensor_data")
 
-BROKER = "localhost"
+BROKER = os.getenv("BROKER", "mosquitto")
 TOPIC_ELEC = "sensor/electricity"
 TOPIC_WATER = "sensor/water"
 

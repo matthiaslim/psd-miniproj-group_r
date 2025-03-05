@@ -1,0 +1,35 @@
+version: '3'
+services:
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: sensor_data
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql 
+
+  data-ingestion:
+    build: .
+    container_name: data-ingestion
+    restart: always
+    depends_on:
+      - mosquitto
+      - mysql
+    environment:
+      BROKER: "mosquitto"
+      DB_HOST: "mysql"
+      DB_USER: "root"
+      DB_PASS: "admin"
+      DB_NAME: "sensor_data"
