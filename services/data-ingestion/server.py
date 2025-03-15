@@ -12,6 +12,8 @@ DB_NAME = os.getenv("DB_NAME", "sensor_data")
 BROKER = os.getenv("BROKER", "mosquitto")
 TOPIC_ELEC = "sensor/electricity"
 TOPIC_WATER = "sensor/water"
+TOPIC_WASTE = "sensor/waste"
+TOPIC_PETROL = "sensor/petrol"
 
 conn = pymysql.connect(host=DB_HOST, user=DB_USER, password=DB_PASS, database=DB_NAME)
 cursor = conn.cursor()
@@ -20,21 +22,25 @@ def on_message(client, userdata, msg):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     value = float(msg.payload.decode())
 
-    if msg.topic == TOPIC_ELEC:
-        cursor.execute("""
-            INSERT INTO consumption (timestamp, electricity, water) 
-            VALUES (%s, %s, NULL) 
-            ON DUPLICATE KEY UPDATE electricity = VALUES(electricity)
-        """, (timestamp, value))
+    column_map = {
+        TOPIC_ELEC: "electricity",
+        TOPIC_WATER: "water",
+        TOPIC_WASTE: "waste",
+        TOPIC_PETROL: "petroleum"
+    }
 
-    elif msg.topic == TOPIC_WATER:
-        cursor.execute("""
-            INSERT INTO consumption (timestamp, electricity, water) 
-            VALUES (%s, NULL, %s) 
-            ON DUPLICATE KEY UPDATE water = VALUES(water)
-        """, (timestamp, value))
+    column = column_map.get(msg.topic)
+    if column:
+        sql = f"""
+            INSERT INTO consumption (timestamp, {column}) 
+            VALUES (%s, %s) 
+            ON DUPLICATE KEY UPDATE {column} = VALUES({column})
+        """
+        cursor.execute(sql, (timestamp, value))
         conn.commit()
         print(f"Stored in MySQL -> {timestamp}: {msg.topic} -> {value}")
+    else:
+        print(f"Unknown topic: {msg.topic}")
 
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.on_message = on_message
@@ -42,5 +48,7 @@ client.connect(BROKER, 1883, 60)
 
 client.subscribe(TOPIC_ELEC)
 client.subscribe(TOPIC_WATER)
+client.subscribe(TOPIC_WASTE)  
+client.subscribe(TOPIC_PETROL) 
 
 client.loop_forever()
