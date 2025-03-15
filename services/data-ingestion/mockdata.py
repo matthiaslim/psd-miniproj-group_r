@@ -1,28 +1,42 @@
 import paho.mqtt.client as mqtt
-import random
 import time
+import numpy as np
+import json
+from datetime import datetime
 
-BROKER = "localhost"  
+BROKER = "localhost"
 TOPIC_ELEC = "sensor/electricity"
 TOPIC_WATER = "sensor/water"
+TOPIC_WASTE = "sensor/waste"
 
+# Initialize MQTT client
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.connect(BROKER, 1883, 60)
 
 try:
     while True:
-        # Generate Random Values for both elec and water <- (Assuming using sensor/mqtt)
-        electricity_usage = round(random.uniform(0.5, 10.0), 2)
+        # Generate timestamp
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
-        water_usage = round(random.uniform(10, 100), 2)
+        # Generate random sensor values
+        electricity_usage = np.random.uniform(50, 100)  # Single value
+        water_usage = np.random.uniform(1000, 1500)  # Single value
+        waste_usage = np.random.uniform(25, 50)  # Single value
 
-        client.publish(TOPIC_ELEC, electricity_usage)
-        client.publish(TOPIC_WATER, water_usage)
+        # Format as JSON before publishing
+        energy_payload = json.dumps({"timestamp": timestamp, "value": electricity_usage})
+        water_payload = json.dumps({"timestamp": timestamp, "value": water_usage})
+        waste_payload = json.dumps({"timestamp": timestamp, "value": waste_usage})
 
-        print(f"Sent -> Electricity: {electricity_usage} kWh | Water: {water_usage} L")
+        # Publish each value to the respective MQTT topic
+        client.publish(TOPIC_ELEC, energy_payload)
+        client.publish(TOPIC_WATER, water_payload)
+        client.publish(TOPIC_WASTE, waste_payload)
+
+        print(f"Sent -> Electricity: {electricity_usage:.2f} kWh | Water: {water_usage:.2f} L | Waste: {waste_usage:.2f} KG")
         
-        #change the timing as needed, now 10 seconds
-        time.sleep(10)  
+        # Change the timing as needed (currently 10 seconds)
+        time.sleep(10)
 
 except KeyboardInterrupt:
     print("Stopping mock data sender.")
