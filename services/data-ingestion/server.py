@@ -17,7 +17,6 @@ BROKER = os.getenv("BROKER", "mosquitto")
 TOPIC_ELEC = "sensor/electricity"
 TOPIC_WATER = "sensor/water"
 TOPIC_WASTE = "sensor/waste"
-TOPIC_PETROL = "sensor/petrol"
 
 print(f"Starting data ingestion service...")
 print(f"Database: {DB_HOST}:{DB_PORT}, User: {DB_USER}")
@@ -63,7 +62,6 @@ def on_message(client, userdata, msg):
             TOPIC_ELEC: "electricity",  
             TOPIC_WATER: "water",
             TOPIC_WASTE: "waste",
-            TOPIC_PETROL: "petroleum"
         }
 
         column = column_map.get(msg.topic)
@@ -88,6 +86,5 @@ client.connect(BROKER, 1883, 60)
 client.subscribe(TOPIC_ELEC)
 client.subscribe(TOPIC_WATER)
 client.subscribe(TOPIC_WASTE)  
-client.subscribe(TOPIC_PETROL) 
 
 client.loop_forever()

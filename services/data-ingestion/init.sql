@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS consumption (
     electricity DECIMAL(10, 2),
     water DECIMAL(10, 2),
     waste DECIMAL(10, 2),
-    petroleum  DECIMAL(10, 2),
     UNIQUE (timestamp)
 );
 
