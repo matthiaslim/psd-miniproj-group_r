@@ -1,6 +1,8 @@
 // src/widgets/SensorDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import mqtt from "mqtt";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SensorDashboard = () => {
     const [electricity, setElectricity] = useState(null);
@@ -31,6 +33,7 @@ const SensorDashboard = () => {
             client.subscribe('sensor/electricity');
             client.subscribe('sensor/water');
             client.subscribe('sensor/waste');
+            client.subscribe('alerts');
         });
 
         client.on('message', (topic, message) => {
@@ -46,6 +49,18 @@ const SensorDashboard = () => {
                         break;
                     case 'sensor/waste':
                         setWaste(data);
+                        break;
+                    case 'alerts':
+                        console.log('Received alert:', message.data);
+                        toast.error(`🚨 Anomaly detected in ${message.data.column}: ${message.data.value}`, { 
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            theme: "white",
+                        });
                         break;
                     default:
                         console.log('Unknown topic:', topic);
@@ -124,6 +139,8 @@ const SensorDashboard = () => {
                 <span className={`inline-block w-3 h-3 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`}></span>
                 <span className="ml-2 text-sm">{connected ? 'Connected' : 'Disconnected'}</span>
             </div>
+
+            <ToastContainer />
         </div>
     );
 };
