@@ -6,16 +6,18 @@ WORKDIR /app
 
 # Copy the script
 COPY server.py ./
+COPY mockdata.py ./
 
 # Install dependencies
-RUN pip install paho-mqtt pymysql cryptography
+RUN pip install paho-mqtt pymysql cryptography numpy
 
 # Define environment variables
 ENV BROKER="mosquitto"
 ENV DB_HOST="mysql"
-ENV DB_USER="root"
-ENV DB_PASS="admin"
+ENV DB_USER="user"
+ENV DB_PASS="password"
 ENV DB_NAME="sensor_data"
+ENV DB_PORT="3306"
 
 # Command to run the script
 CMD ["python", "server.py"]

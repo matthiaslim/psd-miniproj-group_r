@@ -4,7 +4,7 @@ import numpy as np
 import json
 from datetime import datetime
 
-BROKER = "localhost"
+BROKER = "mosquitto"
 TOPIC_ELEC = "sensor/electricity"
 TOPIC_WATER = "sensor/water"
 TOPIC_WASTE = "sensor/waste"

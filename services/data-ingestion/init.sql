@@ -10,3 +10,6 @@ CREATE TABLE IF NOT EXISTS consumption (
     petroleum  DECIMAL(10, 2),
     UNIQUE (timestamp)
 );
+
+GRANT ALL PRIVILEGES ON sensor_data.* TO 'user'@'%';
+FLUSH PRIVILEGES;

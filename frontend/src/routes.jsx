@@ -9,6 +9,8 @@ import {
 } from "@heroicons/react/24/solid";
 import { Home, Profile, Tables, Notifications, Analytics } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
+import { element } from "prop-types";
+import SensorDashboard from "./pages/dashboard/sensordashboard";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -25,12 +27,18 @@ export const routes = [
         path: "/home",
         element: <Home />,
       },
+      {
+        icon: <HomeIcon {...icon} />,
+        name: "sensordashboard",
+        path: "/sensordashboard",
+        element: <SensorDashboard />,
+      },
       // Resource Analytics
       {
         icon: <ChartBarIcon {...icon} />,
         name: "Analytics",
         path: "/analytics",
-        element:  <Analytics />,
+        element: <Analytics />,
       },
       // Consumption Alerts
       {

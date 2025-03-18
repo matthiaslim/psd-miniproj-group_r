@@ -25,6 +25,17 @@ services:
             config:
               claims_to_verify:
                 - exp
+                
+  - name: websocket-service
+    url: http://websocket-bridge:9001
+    routes:
+      - name: realtime
+        paths:
+          - /api/realtime
+        strip_path: true
+        protocols:
+          - http
+          - https
 
 consumers:
   - username: default
