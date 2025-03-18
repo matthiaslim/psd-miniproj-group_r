@@ -24,10 +24,9 @@ services:
           - name: jwt
             config:
               claims_to_verify:
-                - exp
-                
-  - name: websocket-service
-    url: http://websocket-bridge:9001
+                - exp  
+  - name: mqtt-websocket-service
+    url: http://mosquitto:9001
     routes:
       - name: realtime
         paths:

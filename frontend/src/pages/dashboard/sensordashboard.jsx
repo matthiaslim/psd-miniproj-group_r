@@ -1,5 +1,6 @@
 // src/widgets/SensorDashboard.jsx
 import React, { useState, useEffect } from 'react';
+import mqtt from "mqtt";
 
 const SensorDashboard = () => {
     const [electricity, setElectricity] = useState(null);
@@ -8,42 +9,78 @@ const SensorDashboard = () => {
     const [connected, setConnected] = useState(false);
 
     useEffect(() => {
-        // Connect to the Kong-proxied WebSocket endpoint
-        const ws = new WebSocket('ws://localhost:8000/api/realtime');
+        console.log('Attempting to connect to MQTT broker...');
+        // Use MQTT client properly with Kong's endpoint
+        const client = mqtt.connect('ws://localhost:8000/api/realtime', {
+            reconnectPeriod: 1000,
+            connectTimeout: 30000,
+            // Add these options for debugging
+            clientId: 'dashboard_' + Math.random().toString(16).substr(2, 8)
+        });
 
-        ws.onopen = () => {
-            console.log('Connected to sensor data stream');
+        // Add connecting event handler
+        client.on('connecting', () => {
+            console.log('Connecting to MQTT broker...');
+        });
+
+        client.on('connect', () => {
+            console.log('Connected to MQTT broker');
             setConnected(true);
-        };
 
-        ws.onmessage = (event) => {
-            const message = JSON.parse(event.data);
+            // Subscribe to sensor topics
+            client.subscribe('sensor/electricity');
+            client.subscribe('sensor/water');
+            client.subscribe('sensor/waste');
+        });
 
-            switch (message.topic) {
-                case 'sensor/electricity':
-                    setElectricity(message.data);
-                    break;
-                case 'sensor/water':
-                    setWater(message.data);
-                    break;
-                case 'sensor/waste':
-                    setWaste(message.data);
-                    break;
-                default:
-                    console.log('Unknown topic:', message.topic);
+        client.on('message', (topic, message) => {
+            try {
+                const data = JSON.parse(message.toString());
+
+                switch (topic) {
+                    case 'sensor/electricity':
+                        setElectricity(data);
+                        break;
+                    case 'sensor/water':
+                        setWater(data);
+                        break;
+                    case 'sensor/waste':
+                        setWaste(data);
+                        break;
+                    default:
+                        console.log('Unknown topic:', topic);
+                }
+            } catch (error) {
+                console.error('Error parsing message:', error);
             }
-        };
+        });
 
-        ws.onclose = () => {
-            console.log('Disconnected from sensor data stream');
+        client.on('error', (err) => {
+            console.error('MQTT error:', err);
             setConnected(false);
-        };
+        });
+
+        // Add more event handlers for debugging
+        client.on('reconnect', () => {
+            console.log('Attempting to reconnect to MQTT broker...');
+        });
+
+        client.on('offline', () => {
+            console.log('MQTT client is offline');
+            setConnected(false);
+        });
+
+        client.on('close', () => {
+            console.log('Disconnected from MQTT broker');
+            setConnected(false);
+        });
 
         // Clean up on unmount
         return () => {
-            ws.close();
+            client.end();
         };
     }, []);
+
 
     return (
         <div className="p-4">
