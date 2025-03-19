@@ -4,15 +4,37 @@ import numpy as np
 import json
 from datetime import datetime
 import random
+import os
+import sys
+import socket
 
-BROKER = "mosquitto"
+BROKER = os.getenv("MQTT_BROKER", "localhost")
 TOPIC_ELEC = "sensor/electricity"
 TOPIC_WATER = "sensor/water"
 TOPIC_WASTE = "sensor/waste"
 
+print(f"Starting mock data generator...")
+print(f"MQTT Broker: {BROKER}")
+
 # Initialize MQTT client
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-client.connect(BROKER, 1883, 60)
+
+# Add MQTT connection retry logic
+mqtt_retries = 30
+for attempt in range(mqtt_retries):
+    try:
+        print(f"Attempting to connect to MQTT broker at {BROKER} (attempt {attempt+1}/{mqtt_retries})...")
+        client.connect(BROKER, 1883, 60)
+        print(f"Successfully connected to MQTT broker at {BROKER}")
+        break
+    except (socket.gaierror, ConnectionRefusedError) as e:
+        if attempt < mqtt_retries - 1:
+            print(f"Failed to connect to MQTT broker: {e}")
+            print(f"Retrying in 5 seconds...")
+            time.sleep(5)
+        else:
+            print(f"Failed to connect to MQTT broker after {mqtt_retries} attempts. Exiting.")
+            sys.exit(1)
 
 def generate_reading(normal_range, anomaly_range, anomaly_chance=0.05):
     """Generates a normal sensor reading with a small chance of an anomaly."""

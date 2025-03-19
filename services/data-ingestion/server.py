@@ -1,11 +1,11 @@
 import paho.mqtt.client as mqtt
 import pymysql
 from datetime import datetime
-import cryptography
 import os
 import time
 import sys
 import json
+import socket
 
 DB_HOST = os.getenv("DB_HOST", "mysql")
 DB_USER = os.getenv("DB_USER", "user")
@@ -13,7 +13,8 @@ DB_PASS = os.getenv("DB_PASS", "password")
 DB_NAME = os.getenv("DB_NAME", "sustainable_consumption")
 DB_PORT = int(os.getenv("DB_PORT", "3306"))
 
-BROKER = os.getenv("BROKER", "mosquitto")
+# Use localhost as default, safer for local development
+BROKER = os.getenv("MQTT_BROKER", "mosquitto")
 TOPIC_ELEC = "sensor/electricity"
 TOPIC_WATER = "sensor/water"
 TOPIC_WASTE = "sensor/waste"
@@ -22,6 +23,7 @@ print(f"Starting data ingestion service...")
 print(f"Database: {DB_HOST}:{DB_PORT}, User: {DB_USER}")
 print(f"MQTT Broker: {BROKER}")
 
+# Database connection with retry logic
 max_retries = 30
 retry_count = 0
 conn = None
@@ -79,12 +81,34 @@ def on_message(client, userdata, msg):
     except Exception as e:
         print(f"Error processing message: {e}")
 
+# MQTT connection with retry logic
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.on_message = on_message
-client.connect(BROKER, 1883, 60)
+
+# Add MQTT connection retry logic
+mqtt_retries = 30
+for attempt in range(mqtt_retries):
+    try:
+        print(f"Attempting to connect to MQTT broker at {BROKER} (attempt {attempt+1}/{mqtt_retries})...")
+        client.connect(BROKER, 1883, 60)
+        print(f"Successfully connected to MQTT broker at {BROKER}")
+        break
+    except (socket.gaierror, ConnectionRefusedError) as e:
+        if attempt < mqtt_retries - 1:
+            print(f"Failed to connect to MQTT broker: {e}")
+            print(f"Retrying in 5 seconds...")
+            time.sleep(5)
+        else:
+            print(f"Failed to connect to MQTT broker after {mqtt_retries} attempts. Exiting.")
+            sys.exit(1)
 
 client.subscribe(TOPIC_ELEC)
 client.subscribe(TOPIC_WATER)
 client.subscribe(TOPIC_WASTE)  
 
-client.loop_forever()
+try:
+    print("Starting MQTT listener loop...")
+    client.loop_forever()
+except KeyboardInterrupt:
+    print("Shutting down...")
+    client.disconnect()
