@@ -32,6 +32,18 @@ export function Analytics() {
     averageWaste: 0,
   });
 
+  const [highestValue, setHighestValue] = useState({
+    electricity: { value: null, timestamp: null },
+    water: { value: null, timestamp: null },
+    waste: { value: null, timestamp: null },
+  });
+  
+  const [lowestValue, setLowestValue] = useState({
+    electricity: { value: null, timestamp: null },
+    water: { value: null, timestamp: null },
+    waste: { value: null, timestamp: null },
+  });
+
   const resourceTypes = [
     {
       label: "Electricity",
@@ -135,8 +147,6 @@ export function Analytics() {
       const groupedData = groupDataByTimeFrame(response.data, column);
       setCategoriesValue(groupedData.map(item => item.timestamp));
 
-      setCategoriesValue(groupedData.map(item => item.timestamp)); 
-
       return groupedData.map(item => item[column]); 
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -144,6 +154,66 @@ export function Analytics() {
     }
   };
 
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed, so add 1
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  };
+
+  const loadData = async (column) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`http://localhost:3003/api/consumption-analytics/${column}`);
+      const data = response.data;
+  
+      let highest = { value: -Infinity, timestamp: null };
+      let lowest = { value: Infinity, timestamp: null };
+  
+      data.forEach(item => {
+        const itemValue = item[column];
+        const itemTimestamp = item.timestamp; 
+  
+        if (itemValue > highest.value) {
+          highest = { value: itemValue, timestamp: formatTimestamp(itemTimestamp) };
+        }
+  
+        // Check for lowest value
+        if (itemValue < lowest.value) {
+          lowest = { value: itemValue, timestamp: formatTimestamp(itemTimestamp) };
+        }
+      });
+  
+      // Store the highest and lowest values along with the timestamp in state
+      setHighestValue(prevState => ({
+        ...prevState,
+        [column]: highest,
+      }));
+  
+      setLowestValue(prevState => ({
+        ...prevState,
+        [column]: lowest,
+      }));
+  
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadData("electricity");
+    loadData("water");
+    loadData("waste");
+  }, []);
+
+  
   const groupDataByTimeFrame = (data, column) => {
     const grouped = {};
 
@@ -239,20 +309,59 @@ const calculateAverageConsumption = (energyData, waterData, wasteData) => {
       <TabsBody>
         {resourceTypes.map(({ value, charts }) => (
           <TabPanel key={value} value={value}>
-            <div className="mb-6 text-center">
+           <div className="mb-6 text-center">
               <Typography variant="h5" color="blue-gray">
-                Average Consumption
+                Key statistic
               </Typography>
-              <Typography variant="h7" color="blue-gray" className="font-bold">
-                {loading ? "Loading..." : (
-                  <>
-                    <p>Electricity: {averageConsumption.averageElectricity} kWh</p>
-                    <p>Water: {averageConsumption.averageWater} L</p>
-                    <p>Waste: {averageConsumption.averageWaste} Kg</p>
-                  </>
-                )}
-              </Typography>
-            </div>
+
+                  {/* Flex container to hold the three statistics sections */}
+                  <div className="flex flex-wrap justify-between items-start">
+                    
+                    {/* Electricity Statistics */}
+                    <div className="w-full md:w-1/3 px-4">
+                      <Typography variant="h6" className="font-bold">
+                        Electricity:
+                        </Typography>
+                        <Typography variant="h7" className="font">
+                        <p>Highest: {highestValue.electricity.value} kWh </p>
+                        <p>Time: {highestValue.electricity.timestamp}</p>
+                        <p>Lowest: {lowestValue.electricity.value} kWh </p>
+                        <p>Time: {lowestValue.electricity.timestamp}</p>
+                        <p>Average: {averageConsumption.averageElectricity} kWh</p>
+                      </Typography>
+                    </div>
+
+                    {/* Water Statistics */}
+                    <div className="w-full md:w-1/3 px-4">
+                    <Typography variant="h6" className="font-bold">
+                        Water:
+                        </Typography>
+                        <Typography variant="h7" className="font">
+                        <p>Highest: {highestValue.water.value} L </p>
+                        <p> Time: {highestValue.water.timestamp}</p>
+                        <p> Lowest: {lowestValue.water.value} L </p>
+                        <p> Time: {lowestValue.water.timestamp} </p>
+                        <p>Average: {averageConsumption.averageWater} L</p>
+                      </Typography>
+                    </div>
+
+                    {/* Waste Statistics */}
+                    <div className="w-full md:w-1/3 px-4">
+                      <Typography variant="h6" className="font-bold">
+                        Waste:
+                        </Typography>
+                        <Typography variant="h7" className="font">
+                        <p>Highest: {highestValue.waste.value} Kg </p>
+                        <p>Time: {highestValue.waste.timestamp}</p>
+                        <p>Lowest: {lowestValue.waste.value} Kg</p> 
+                        <p>Time: {lowestValue.waste.timestamp}</p>
+                        <p>Average: {averageConsumption.averageWaste} Kg</p>
+                      </Typography>
+                    </div>
+                  </div>
+                </div>
+
+
             <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-1">
               {charts.map((props, index) => (
                 <StatisticsChart
