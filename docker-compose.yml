@@ -1,22 +1,16 @@
 services:
   mysql:
-    image: mysql:8.0
+    image: mysql:latest
+    container_name: mysql
+    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: sensor_data
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: sustainable_consumption
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
-      - mysql-data:/var/lib/mysql
-      - ./services/data-ingestion/init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uuser", "-ppassword" ]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   mosquitto:
     image: eclipse-mosquitto:latest
@@ -25,6 +19,7 @@ services:
       - "9001:9001"
     volumes:
       - ./services/data-ingestion/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
   kong:
     image: kong:latest
     environment:
@@ -43,42 +38,6 @@ services:
       - "8002:8002" # Kong Admin GUI port
     volumes:
       - ./kong.yml:/usr/local/kong/declarative/kong.yml:ro
-
-  mosquitto:
-    image: eclipse-mosquitto
-    container_name: mosquitto
-    ports:
-      - "1883:1883"
-    volumes:
-      - ./services/data-ingestion/mosquitto.conf:/mosquitto/config/mosquitto.conf
-
-  mysql:
-    image: mysql:latest
-    container_name: mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: admin
-      MYSQL_DATABASE: sustainable_consumption
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-
-  data-ingestion:
-    build: ./services/data-ingestion
-    restart: always
-    depends_on:
-      - mosquitto
-      - mysql
-      - kong
-    environment:
-      PORT: 3001
-      BROKER: "mosquitto"
-      DB_HOST: "mysql"
-      DB_USER: "root"
-      DB_PASS: "admin"
-      DB_NAME: "sustainable_consumption"
 
   auth-service:
     build: ./services/auth-service
@@ -109,6 +68,7 @@ services:
     depends_on:
       - kong
       - mysql
+
   data-ingestion:
     build:
       context: ./services/data-ingestion
@@ -118,11 +78,12 @@ services:
     environment:
       - DB_HOST=mysql
       - DB_PORT=3306
-      - DB_USER=user
-      - DB_PASS=password
-      - DB_NAME=sensor_data
+      - DB_USER=root
+      - DB_PASS=admin
+      - DB_NAME=sustainable_consumption
       - MQTT_BROKER=mosquitto
       - MQTT_PORT=1883
+
   alert-service:
     build:
       context: ./services/alert-service
@@ -132,9 +93,9 @@ services:
     environment:
       - DB_HOST=mysql
       - DB_PORT=3306
-      - DB_USER=user
-      - DB_PASS=password
-      - DB_NAME=sensor_data
+      - DB_USER=root
+      - DB_PASS=admin
+      - DB_NAME=sustainable_consumption
       - MQTT_BROKER=mosquitto
       - MQTT_PORT=1883
 
