@@ -16,7 +16,6 @@ import { StatisticsChart } from "@/widgets/charts";
 import { chartsConfig } from "@/configs";
 import axios from 'axios';
 
-
 export function Analytics() {
   const [timeRange, setTimeRange] = useState("weekly");
   const [energyData, setEnergyData] = useState([]);
@@ -141,13 +140,29 @@ export function Analytics() {
     }
   ];
 
-  const fetchData = async (column) => {
+  const fetchData = async (column, range) => {
     try {
-      const response = await axios.get(`http://localhost:3003/api/consumption-analytics/${column}`);
-      const groupedData = groupDataByTimeFrame(response.data, column);
-      setCategoriesValue(groupedData.map(item => item.timestamp));
+      const response = await axios.get(`http://localhost:3003/api/consumption-analytics/${range}/${column}`);
 
-      return groupedData.map(item => item[column]); 
+      console.log(response.data);
+
+      if (range === "weekly") {
+        setCategoriesValue(response.data.map(item => item.timestamp));
+        return response.data.map(item => item[column]);
+
+      } else if (range === "monthly") {
+        setCategoriesValue(response.data.map(item => item.timestamp));
+        return response.data.map(item => item[column]);
+      }
+      else
+      setCategoriesValue(
+        response.data.map(item => {
+          const time = new Date(item.timestamp);
+          return time.toLocaleTimeString('en-GB'); 
+        })
+      );
+        return response.data.map(item => item[column]);
+
     } catch (error) {
       console.error("Error fetching data:", error);
       return [];
@@ -158,7 +173,7 @@ export function Analytics() {
     const date = new Date(timestamp);
     
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed, so add 1
+    const month = String(date.getMonth() + 1).padStart(2, '0'); 
     const day = String(date.getDate()).padStart(2, '0');
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
@@ -213,43 +228,17 @@ export function Analytics() {
     loadData("waste");
   }, []);
 
-  
-  const groupDataByTimeFrame = (data, column) => {
-    const grouped = {};
-
-    // Function to format date as YYYY-MM-DD
-    const formatDate = date => date.toISOString().split('T')[0];
-
-    data.forEach(item => {
-        const date = new Date(item.timestamp);
-        let key;
-
-        key = formatDate(date);
-        
-        if (!grouped[key]) {
-            grouped[key] = {
-                timestamp: key,
-                [column]: 0,
-                count: 0,
-            };
-        }
-
-        grouped[key][column] += Number(item[column]) || 0;
-        grouped[key].count += 1;
-    });
-
-    return Object.values(grouped);
-};
-
-
 const calculateAverageConsumption = (energyData, waterData, wasteData) => {
   const calculateAverage = (data) => {
     if (!data || data.length === 0) return 0;
-    const totalConsumption = data.reduce((acc, curr) => acc + (curr || 0), 0);
-    return parseFloat((totalConsumption / 7).toFixed(2)); 
+    const cleanedData = data.map(item => parseFloat(item) || 0);  // Convert to float, default to 0 if NaN
+    const totalConsumption = cleanedData.reduce((acc, curr) => acc + curr, 0);
+
+    return parseFloat((totalConsumption / data.length).toFixed(2)); 
   };
 
   return {
+
     averageElectricity: calculateAverage(energyData),
     averageWater: calculateAverage(waterData),
     averageWaste: calculateAverage(wasteData),
@@ -259,9 +248,9 @@ const calculateAverageConsumption = (energyData, waterData, wasteData) => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      const energy = await fetchData("electricity");
-      const water = await fetchData("water");
-      const materials = await fetchData("waste");
+      const energy = await fetchData("electricity", timeRange);
+      const water = await fetchData("water", timeRange);
+      const materials = await fetchData("waste", timeRange);
 
       setEnergyData(energy);
       setWaterData(water);
@@ -279,6 +268,8 @@ const calculateAverageConsumption = (energyData, waterData, wasteData) => {
     loadData();
   }, [timeRange, selectedTab]);
 
+  
+
 
   return (
     <div className="mt-12">
@@ -290,8 +281,10 @@ const calculateAverageConsumption = (energyData, waterData, wasteData) => {
               value={timeRange}
               onChange={(value) => setTimeRange(value)}
             >
+                <Option value="daily">Daily</Option>
                <Option value="weekly">Weekly</Option>
                <Option value="monthly">Monthly</Option>
+
             </Select>
           </div>
         </CardBody>
