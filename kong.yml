@@ -20,12 +20,13 @@ services:
           - /api/prediction
         strip_path: true
     plugins:
-    - name: jwt
-      config:
-        key_claim_name: "iss"
-        secret_is_base64: false
-        claims_to_verify:
-          - "exp"
+      - name: jwt
+        config:
+          key_claim_name: "iss"
+          secret_is_base64: false
+          claims_to_verify:
+            - "exp"
+
   - name: mqtt-websocket-service
     url: http://mosquitto:9001
     routes:
