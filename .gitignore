@@ -312,3 +312,4 @@ dist
 
 # VSCode 
 .DS_Store
+git-conventional-commits.yaml
