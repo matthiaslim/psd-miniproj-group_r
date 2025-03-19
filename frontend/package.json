@@ -12,6 +12,7 @@
     "@heroicons/react": "2.0.18",
     "@material-tailwind/react": "2.1.4",
     "apexcharts": "^3.44.0",
+    "axios": "^1.8.3",
     "material-tailwind-dashboard-react": "file:",
     "mqtt": "^5.10.4",
     "prop-types": "15.8.1",

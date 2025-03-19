@@ -27,6 +27,13 @@ services:
           claims_to_verify:
             - "exp"
 
+  - name: consumption-analytics-service
+    url: http://consumption-analytics-service:3003
+    routes:
+      - name: consumption-analytics-routes
+        paths:
+          - /api/consumption-analytics/*
+
   - name: mqtt-websocket-service
     url: http://mosquitto:9001
     routes:

@@ -7,6 +7,8 @@ import random
 import os
 import sys
 import socket
+from datetime import datetime, timedelta
+
 
 BROKER = os.getenv("MQTT_BROKER", "localhost")
 TOPIC_ELEC = "sensor/electricity"
@@ -45,7 +47,7 @@ def generate_reading(normal_range, anomaly_range, anomaly_chance=0.05):
 try:
     while True:
         # Generate timestamp
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        timestamp = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S.%f")
 
         electricity_usage = generate_reading(
             normal_range=(0.5, 10.0), 

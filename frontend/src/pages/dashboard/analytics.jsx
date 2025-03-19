@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Tabs,
   TabsHeader,
@@ -14,16 +14,29 @@ import {
 } from "@material-tailwind/react";
 import { StatisticsChart } from "@/widgets/charts";
 import { chartsConfig } from "@/configs";
+import axios from 'axios';
+
 
 export function Analytics() {
-  const [timeRange, setTimeRange] = useState("daily");
-  const [department, setDepartment] = useState("all");
+  const [timeRange, setTimeRange] = useState("weekly");
+  const [energyData, setEnergyData] = useState([]);
+  const [waterData, setWaterData] = useState([]);
+  const [materialData, setMaterialData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [categoriesValue, setCategoriesValue] = useState([]);
 
-  // Mock data - replace with real data from your backend
+  const [selectedTab, setSelectedTab] = useState('electricity');
+  const [averageConsumption, setAverageConsumption] = useState({
+    averageElectricity: 0,
+    averageWater: 0,
+    averageWaste: 0,
+  });
+
   const resourceTypes = [
     {
-      label: "Energy",
-      value: "energy",
+      label: "Electricity",
+      value: "electricity",
+      column: "electricity",
       charts: [
         {
           title: "Energy Consumption",
@@ -33,7 +46,7 @@ export function Analytics() {
             height: 220,
             series: [{
               name: "Usage",
-              data: [30, 40, 35, 50, 49, 60, 70, 91, 125]
+              data: energyData,
             }],
             options: {
               ...chartsConfig,
@@ -42,36 +55,14 @@ export function Analytics() {
                 ...chartsConfig.chart,
                 background: "#ffffff",
                 toolbar: {
-                    show: true,
+                  show: true,
                 }
               },
               stroke: {
                 lineCap: "round"
               },
               xaxis: {
-                categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"]
-              }
-            }
-          }
-        },
-        {
-          title: "Peak Usage Hours",
-          description: "Energy consumption by hour",
-          chart: {
-            type: "bar",
-            height: 220,
-            series: [{
-              name: "kWh",
-              data: [44, 55, 57, 56, 61, 58, 63, 60, 66]
-            }],
-            options: {
-              ...chartsConfig,
-              chart: {
-                ...chartsConfig.chart,
-                background: "#ffffff",
-              },
-              xaxis: {
-                categories: ['8AM', '10AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12AM']
+                categories: categoriesValue
               }
             }
           }
@@ -81,6 +72,7 @@ export function Analytics() {
     {
       label: "Water",
       value: "water",
+      column: "water", 
       charts: [
         {
           title: "Water Consumption",
@@ -90,42 +82,26 @@ export function Analytics() {
             height: 220,
             series: [{
               name: "Usage",
-              data: [140, 155, 147, 156, 161, 158, 163, 160, 166]
+              data: waterData,
             }],
             options: {
               ...chartsConfig,
               chart: {
                 ...chartsConfig.chart,
-                background: '#ffffff', // White background
+                background: '#ffffff',
               },
               xaxis: {
-                categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"]
+                categories: categoriesValue
               }
-            }
-          }
-        },
-        {
-          title: "Usage by Department",
-          description: "Water consumption distribution",
-          chart: {
-            type: "pie",
-            height: 220,
-            series: [44, 55, 13, 43, 22],
-            options: {
-              ...chartsConfig,
-              chart: {
-                ...chartsConfig.chart,
-                background: '#ffffff', // White background
-              },
-              labels: ['Production', 'Office', 'Cafeteria', 'Cleaning', 'Other']
             }
           }
         }
       ]
     },
     {
-      label: "Materials",
-      value: "materials",
+      label: "Waste",
+      value: "waste",
+      column: "waste",
       charts: [
         {
           title: "Material Usage",
@@ -135,16 +111,16 @@ export function Analytics() {
             height: 220,
             series: [{
               name: "Usage",
-              data: [440, 505, 414, 671, 227, 413, 201, 352, 752]
+              data: materialData, // Dynamic data
             }],
             options: {
               ...chartsConfig,
               chart: {
                 ...chartsConfig.chart,
-                background: '#ffffff', // White background
+                background: '#ffffff',
               },
               xaxis: {
-                categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"]
+                categories: categoriesValue
               }
             }
           }
@@ -153,66 +129,150 @@ export function Analytics() {
     }
   ];
 
+  const fetchData = async (column) => {
+    try {
+      const response = await axios.get(`http://localhost:3003/api/consumption-analytics/${column}`);
+      const groupedData = groupDataByTimeFrame(response.data, column);
+      setCategoriesValue(groupedData.map(item => item.timestamp));
+
+      setCategoriesValue(groupedData.map(item => item.timestamp)); 
+
+      return groupedData.map(item => item[column]); 
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      return [];
+    }
+  };
+
+  const groupDataByTimeFrame = (data, column) => {
+    const grouped = {};
+
+    // Function to format date as YYYY-MM-DD
+    const formatDate = date => date.toISOString().split('T')[0];
+
+    data.forEach(item => {
+        const date = new Date(item.timestamp);
+        let key;
+
+        key = formatDate(date);
+        
+        if (!grouped[key]) {
+            grouped[key] = {
+                timestamp: key,
+                [column]: 0,
+                count: 0,
+            };
+        }
+
+        grouped[key][column] += Number(item[column]) || 0;
+        grouped[key].count += 1;
+    });
+
+    return Object.values(grouped);
+};
+
+
+const calculateAverageConsumption = (energyData, waterData, wasteData) => {
+  const calculateAverage = (data) => {
+    if (!data || data.length === 0) return 0;
+    const totalConsumption = data.reduce((acc, curr) => acc + (curr || 0), 0);
+    return parseFloat((totalConsumption / 7).toFixed(2)); 
+  };
+
+  return {
+    averageElectricity: calculateAverage(energyData),
+    averageWater: calculateAverage(waterData),
+    averageWaste: calculateAverage(wasteData),
+  };
+};
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      const energy = await fetchData("electricity");
+      const water = await fetchData("water");
+      const materials = await fetchData("waste");
+
+      setEnergyData(energy);
+      setWaterData(water);
+      setMaterialData(materials);
+
+      const averages = calculateAverageConsumption(energy, water, materials);
+
+      console.log(averages);
+
+      setAverageConsumption(averages);
+
+      setLoading(false);
+    };
+
+    loadData();
+  }, [timeRange, selectedTab]);
+
+
   return (
     <div className="mt-12">
       <Card className="mb-6">
         <CardBody>
-          <div className="mb-4 grid grid-cols-2 gap-6">
+          <div className="mb-4 grid grid-cols-1 gap-6">
             <Select 
               label="Time Range" 
               value={timeRange}
               onChange={(value) => setTimeRange(value)}
             >
-              <Option value="daily">Daily</Option>
-              <Option value="weekly">Weekly</Option>
-              <Option value="monthly">Monthly</Option>
-              <Option value="yearly">Yearly</Option>
-            </Select>
-            <Select 
-              label="Department" 
-              value={department}
-              onChange={(value) => setDepartment(value)}
-            >
-              <Option value="all">All Departments</Option>
-              <Option value="production">Production</Option>
-              <Option value="office">Office</Option>
-              <Option value="warehouse">Warehouse</Option>
+               <Option value="weekly">Weekly</Option>
+               <Option value="monthly">Monthly</Option>
             </Select>
           </div>
         </CardBody>
       </Card>
 
-      <Tabs value="energy">
-        <TabsHeader>
-          {resourceTypes.map(({ label, value }) => (
-            <Tab key={value} value={value}>
-              {label}
-            </Tab>
-          ))}
-        </TabsHeader>
-        <TabsBody>
-          {resourceTypes.map(({ value, charts }) => (
-            <TabPanel key={value} value={value}>
-              <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2">
-                {charts.map((props, index) => (
-                  <StatisticsChart
-                    key={index}
-                    {...props}
-                    footer={
-                      <Typography
-                        variant="small"
-                        className="flex items-center font-normal text-blue-gray-600"
-                      >
-                        Updated 4 min ago
-                      </Typography>
-                    }
-                  />
-                ))}
-              </div>
-            </TabPanel>
-          ))}
-        </TabsBody>
-      </Tabs>
+      <Tabs value={selectedTab} onChange={setSelectedTab}>
+
+      <TabsHeader>
+        {resourceTypes.map(({ label, value }) => (
+          <Tab key={value} value={value}>
+            {label}
+          </Tab>
+        ))}
+      </TabsHeader>
+      <TabsBody>
+        {resourceTypes.map(({ value, charts }) => (
+          <TabPanel key={value} value={value}>
+            <div className="mb-6 text-center">
+              <Typography variant="h5" color="blue-gray">
+                Average Consumption
+              </Typography>
+              <Typography variant="h7" color="blue-gray" className="font-bold">
+                {loading ? "Loading..." : (
+                  <>
+                    <p>Electricity: {averageConsumption.averageElectricity} kWh</p>
+                    <p>Water: {averageConsumption.averageWater} L</p>
+                    <p>Waste: {averageConsumption.averageWaste} Kg</p>
+                  </>
+                )}
+              </Typography>
+            </div>
+            <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-1">
+              {charts.map((props, index) => (
+                <StatisticsChart
+                  key={index}
+                  {...props}
+                  footer={
+                    <Typography
+                      variant="small"
+                      className="flex items-center font-normal text-blue-gray-600"
+                    >
+                      {loading ? "Loading..." : "Updated just now"}
+                    </Typography>
+                  }
+                />
+              ))}
+            </div>
+          </TabPanel>
+        ))}
+      </TabsBody>
+    </Tabs>
     </div>
   );
 }
