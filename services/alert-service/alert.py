@@ -9,10 +9,10 @@ import json
 DB_HOST = os.getenv("DB_HOST", "mysql")
 DB_USER = os.getenv("DB_USER", "user")
 DB_PASS = os.getenv("DB_PASS", "password")
-DB_NAME = os.getenv("DB_NAME", "sensor_data")
+DB_NAME = os.getenv("DB_NAME", "sustainable_consumption")
 DB_PORT = int(os.getenv("DB_PORT", "3306"))
 
-BROKER = os.getenv("BROKER", "mosquitto")
+BROKER = os.getenv("MQTT_BROKER", "mosquitto")
 TOPIC_ELEC = "sensor/electricity"
 TOPIC_WATER = "sensor/water"
 TOPIC_WASTE = "sensor/waste"
