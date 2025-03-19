@@ -20,16 +20,10 @@ export const routes = [
   {
     layout: "dashboard",
     pages: [
-      // Resource Consumption Dashboard
+      
       {
         icon: <HomeIcon {...icon} />,
-        name: "dashboard",
-        path: "/home",
-        element: <Home />,
-      },
-      {
-        icon: <HomeIcon {...icon} />,
-        name: "sensordashboard",
+        name: "Sensor Dashboard",
         path: "/sensordashboard",
         element: <SensorDashboard />,
       },
@@ -47,19 +41,7 @@ export const routes = [
         path: "/alerts",
         element: <Notifications />,
       },
-      // User Profile & Preferences
-      {
-        icon: <UserCircleIcon {...icon} />,
-        name: "profile",
-        path: "/profile",
-        element: <Profile />,
-      },
-      {
-        icon: <TableCellsIcon {...icon} />,
-        name: "tables",
-        path: "/tables",
-        element: <Tables />,
-      },
+      
     ],
   },
   {

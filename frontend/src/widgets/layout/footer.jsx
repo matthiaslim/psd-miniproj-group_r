@@ -41,7 +41,7 @@ export function Footer({ brandName, brandLink, routes }) {
 }
 
 Footer.defaultProps = {
-  brandName: "Creative Tim",
+  brandName: "PSD Group 16",
   brandLink: "https://www.creative-tim.com",
   routes: [
     { name: "Creative Tim", path: "https://www.creative-tim.com" },

@@ -32,6 +32,13 @@ export function DashboardNavbar() {
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
 
+  const formatPageName = (name) => {
+    if (name === "sensordashboard") {
+      return "Sensor Dashboard";
+    }
+    return name;
+  };
+
   return (
     <Navbar
       color={fixedNavbar ? "white" : "transparent"}
@@ -64,11 +71,11 @@ export function DashboardNavbar() {
               color="blue-gray"
               className="font-normal"
             >
-              {page}
+              {formatPageName(page)}
             </Typography>
           </Breadcrumbs>
           <Typography variant="h6" color="blue-gray">
-            {page}
+            {formatPageName(page)}
           </Typography>
         </div>
         <div className="flex items-center">

@@ -219,55 +219,202 @@ const SensorDashboard = () => {
         };
     }, []);
 
+    // return (
+    //     <div className="p-4">
+    //         <h2 className="text-xl font-bold mb-4">Sensor Dashboard</h2>
+            
+    //         {/* Keep existing real-time cards */}
+    //         <div className="flex gap-4 mb-6">
+    //             <div className="p-4 border rounded bg-blue-50">
+    //                 <h3 className="font-semibold">Electricity</h3>
+    //                 {electricity ? (
+    //                     <>
+    //                         <p className="text-2xl">{electricity.value.toFixed(2)} kWh</p>
+    //                         <p className="text-xs text-gray-500">{electricity.timestamp}</p>
+    //                     </>
+    //                 ) : (
+    //                     <p>Loading...</p>
+    //                 )}
+    //             </div>
+    //             <div className="p-4 border rounded bg-blue-50">
+    //                 <h3 className="font-semibold">Water</h3>
+    //                 {water ? (
+    //                     <>
+    //                         <p className="text-2xl">{water.value.toFixed(2)} L</p>
+    //                         <p className="text-xs text-gray-500">{water.timestamp}</p>
+    //                     </>
+    //                 ) : (
+    //                     <p>Loading...</p>
+    //                 )}
+    //             </div>
+    //             <div className="p-4 border rounded bg-blue-50">
+    //                 <h3 className="font-semibold">Waste</h3>
+    //                 {waste ? (
+    //                     <>
+    //                         <p className="text-2xl">{waste.value.toFixed(2)} KG</p>
+    //                         <p className="text-xs text-gray-500">{waste.timestamp}</p>
+    //                     </>
+    //                 ) : (
+    //                     <p>Loading...</p>
+    //                 )}
+    //             </div>
+    //         </div>
+
+    //         {/* Charts Grid */}
+    //         {isLoading ? (
+    //             <div className="h-[240px] flex items-center justify-center">
+    //                 <p>Loading chart data...</p>
+    //             </div>
+    //         ) : (
+    //             <div className="p-4 border rounded bg-white"> {/* Single card container */}
+    //                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6"> {/* Grid inside the card */}
+    //                     <StatisticsChart
+    //                         title="Electricity Usage (kWh)"
+    //                         description="Historical consumption data"
+    //                         chart={createChartConfig(
+    //                             "Electricity",
+    //                             chartData.electricity,
+    //                             "kWH"
+    //                         )}
+    //                         color="white"
+    //                     />
+    //                     <StatisticsChart
+    //                         title="Water Usage (L)"
+    //                         description="Historical consumption data"
+    //                         chart={createChartConfig(
+    //                             "Water",
+    //                             chartData.water,
+    //                             "Litres"
+    //                         )}
+    //                         color="white"
+    //                     />
+    //                     <StatisticsChart
+    //                         title="Waste Amount (KG)"
+    //                         description="Historical generation data"
+    //                         chart={createChartConfig(
+    //                             "Waste",
+    //                             chartData.waste,
+    //                             "Kilograms"
+    //                         )}
+    //                         color="white"
+    //                     />
+    //                 </div>
+    //             </div>
+    //         )}
+    //         {/* Sensor Data */}
+
+    //         {/* Connection status */}
+    //         <div className="mt-4">
+    //             <span className={`inline-block w-3 h-3 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`}></span>
+    //             <span className="ml-2 text-sm">{connected ? 'Connected' : 'Disconnected'}</span>
+    //         </div>
+
+    //         <ToastContainer />
+    //     </div>
+    // );
     return (
         <div className="p-4">
-            <h2 className="text-xl font-bold mb-4">Sensor Dashboard</h2>
+            <div className="mb-8">
+                <h2 className="text-2xl font-bold text-blue-gray-800 mb-2">Real-Time Sensor Dashboard</h2>
+                <p className="text-blue-gray-600">Monitor your resource consumption in real-time</p>
+            </div>
             
-            {/* Keep existing real-time cards */}
-            <div className="flex gap-4 mb-6">
-                <div className="p-4 border rounded bg-blue-50">
-                    <h3 className="font-semibold">Electricity</h3>
+            {/* Real-time cards with improved styling */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {/* Electricity Card */}
+                <div className="p-6 rounded-xl bg-white shadow-md border border-blue-100 hover:shadow-lg transition-shadow">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 bg-yellow-500/10 rounded-full flex items-center justify-center">
+                            <i className="fas fa-bolt text-yellow-600 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-lg text-blue-gray-800">Electricity</h3>
+                            <p className="text-sm text-blue-gray-600">Real-time consumption</p>
+                        </div>
+                    </div>
                     {electricity ? (
-                        <>
-                            <p className="text-2xl">{electricity.value.toFixed(2)} kWh</p>
-                            <p className="text-xs text-gray-500">{electricity.timestamp}</p>
-                        </>
+                        <div>
+                            <p className="text-3xl font-bold text-blue-gray-900 mb-2">
+                                {electricity.value.toFixed(2)} 
+                                <span className="text-lg font-normal text-blue-gray-600"> kWh</span>
+                            </p>
+                            <p className="text-sm text-blue-gray-500">Last updated: {electricity.timestamp}</p>
+                        </div>
                     ) : (
-                        <p>Loading...</p>
+                        <div className="animate-pulse">
+                            <div className="h-8 bg-blue-gray-100 rounded w-3/4 mb-2"></div>
+                            <div className="h-4 bg-blue-gray-50 rounded w-1/2"></div>
+                        </div>
                     )}
                 </div>
-                <div className="p-4 border rounded bg-blue-50">
-                    <h3 className="font-semibold">Water</h3>
+    
+                {/* Water Card */}
+                <div className="p-6 rounded-xl bg-white shadow-md border border-blue-100 hover:shadow-lg transition-shadow">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center">
+                            <i className="fas fa-tint text-blue-600 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-lg text-blue-gray-800">Water</h3>
+                            <p className="text-sm text-blue-gray-600">Real-time consumption</p>
+                        </div>
+                    </div>
                     {water ? (
-                        <>
-                            <p className="text-2xl">{water.value.toFixed(2)} L</p>
-                            <p className="text-xs text-gray-500">{water.timestamp}</p>
-                        </>
+                        <div>
+                            <p className="text-3xl font-bold text-blue-gray-900 mb-2">
+                                {water.value.toFixed(2)} 
+                                <span className="text-lg font-normal text-blue-gray-600"> L</span>
+                            </p>
+                            <p className="text-sm text-blue-gray-500">Last updated: {water.timestamp}</p>
+                        </div>
                     ) : (
-                        <p>Loading...</p>
+                        <div className="animate-pulse">
+                            <div className="h-8 bg-blue-gray-100 rounded w-3/4 mb-2"></div>
+                            <div className="h-4 bg-blue-gray-50 rounded w-1/2"></div>
+                        </div>
                     )}
                 </div>
-                <div className="p-4 border rounded bg-blue-50">
-                    <h3 className="font-semibold">Waste</h3>
+    
+                {/* Waste Card */}
+                <div className="p-6 rounded-xl bg-white shadow-md border border-blue-100 hover:shadow-lg transition-shadow">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 bg-green-500/10 rounded-full flex items-center justify-center">
+                            <i className="fas fa-trash text-green-600 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-lg text-blue-gray-800">Waste</h3>
+                            <p className="text-sm text-blue-gray-600">Real-time accumulation</p>
+                        </div>
+                    </div>
                     {waste ? (
-                        <>
-                            <p className="text-2xl">{waste.value.toFixed(2)} KG</p>
-                            <p className="text-xs text-gray-500">{waste.timestamp}</p>
-                        </>
+                        <div>
+                            <p className="text-3xl font-bold text-blue-gray-900 mb-2">
+                                {waste.value.toFixed(2)} 
+                                <span className="text-lg font-normal text-blue-gray-600"> KG</span>
+                            </p>
+                            <p className="text-sm text-blue-gray-500">Last updated: {waste.timestamp}</p>
+                        </div>
                     ) : (
-                        <p>Loading...</p>
+                        <div className="animate-pulse">
+                            <div className="h-8 bg-blue-gray-100 rounded w-3/4 mb-2"></div>
+                            <div className="h-4 bg-blue-gray-50 rounded w-1/2"></div>
+                        </div>
                     )}
                 </div>
             </div>
-
-            {/* Charts Grid */}
+    
+            {/* Charts Section */}
             {isLoading ? (
-                <div className="h-[240px] flex items-center justify-center">
-                    <p>Loading chart data...</p>
+                <div className="h-[240px] flex items-center justify-center bg-white rounded-xl shadow-md">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                        <p className="text-blue-gray-600">Loading chart data...</p>
+                    </div>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="p-4 border rounded bg-white">
+                <div className="p-6 border rounded-xl bg-white shadow-md"> 
+                    <h3 className="text-xl font-semibold text-blue-gray-800 mb-6">Historical Data Overview</h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <StatisticsChart
                             title="Electricity Usage (kWh)"
                             description="Historical consumption data"
@@ -278,8 +425,6 @@ const SensorDashboard = () => {
                             )}
                             color="white"
                         />
-                    </div>
-                    <div className="p-4 border rounded bg-white">
                         <StatisticsChart
                             title="Water Usage (L)"
                             description="Historical consumption data"
@@ -290,8 +435,6 @@ const SensorDashboard = () => {
                             )}
                             color="white"
                         />
-                    </div>
-                    <div className="p-4 border rounded bg-white">
                         <StatisticsChart
                             title="Waste Amount (KG)"
                             description="Historical generation data"
@@ -305,13 +448,16 @@ const SensorDashboard = () => {
                     </div>
                 </div>
             )}
-
-            {/* Connection status */}
-            <div className="mt-4">
-                <span className={`inline-block w-3 h-3 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                <span className="ml-2 text-sm">{connected ? 'Connected' : 'Disconnected'}</span>
+    
+            {/* Connection status with improved styling */}
+            <div className="mt-6 p-4 bg-white rounded-lg shadow-sm border border-blue-gray-100 flex items-center">
+                <span className={`w-4 h-4 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'} 
+                    ${connected ? 'animate-pulse' : ''}`}></span>
+                <span className="ml-3 text-sm font-medium text-blue-gray-700">
+                    {connected ? 'Connected to Sensor Network' : 'Disconnected from Sensor Network'}
+                </span>
             </div>
-
+    
             <ToastContainer />
         </div>
     );
