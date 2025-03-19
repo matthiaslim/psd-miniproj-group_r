@@ -11,33 +11,35 @@ const SensorDashboard = () => {
     const [water, setWater] = useState(null);
     const [waste, setWaste] = useState(null);
     const [connected, setConnected] = useState(false);
-    // Add new state for chart data
-    const [waterChartData, setWaterChartData] = useState({
-        labels: [],
-        values: []
+    // Add states for all chart data
+    const [chartData, setChartData] = useState({
+        electricity: { labels: [], values: [] },
+        water: { labels: [], values: [] },
+        waste: { labels: [], values: [] }
     });
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Initialize chart config with null check
-    const waterChartConfig = {
+    // Initialize chart config with null check and for each metric
+    const createChartConfig = (title, data, yAxisTitle) => ({
         type: "line",
         height: 240,
         series: [{
-            name: "Water Usage",
-            data: waterChartData.values.length > 0 ? waterChartData.values : [0] // Provide default value
+            name: title,
+            data: data.values.length > 0 ? data.values : [0]
         }],
         options: {
             ...chartsConfig,
             xaxis: {
                 ...chartsConfig.xaxis,
-                categories: waterChartData.labels.length > 0 ? waterChartData.labels : ['No Data'] // Provide default value
+                categories: data.labels.length > 0 ? data.labels : ['No Data']
             },
             yaxis: {
                 ...chartsConfig.yaxis,
                 title: {
-                    text: "Water Usage (Liters)"
+                    text: yAxisTitle
                 }
             },
-            // Add null value handling
             chart: {
                 ...chartsConfig.chart,
                 animations: {
@@ -56,7 +58,60 @@ const SensorDashboard = () => {
                 }
             }
         }
-    };
+    });
+
+    
+
+    // Add useEffect for fetching chart data
+    useEffect(() => {
+        const fetchChartData = async () => {
+            try {
+                setIsLoading(true);
+                const response = await fetch('http://localhost:8000/api/consumption/history');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                const data = await response.json();
+
+                // Transform data for all three charts
+                const transformed = {
+                    electricity: { labels: [], values: [] },
+                    water: { labels: [], values: [] },
+                    waste: { labels: [], values: [] }
+                };
+
+                // Process data in reverse to get chronological order
+                data.reverse().slice(0,7).forEach(item => {
+                    const timestamp = new Date(item.timestamp).toLocaleTimeString();
+                    
+                    if (item.electricity !== null) {
+                        transformed.electricity.labels.push(timestamp);
+                        transformed.electricity.values.push(item.electricity);
+                    }
+                    if (item.water !== null) {
+                        transformed.water.labels.push(timestamp);
+                        transformed.water.values.push(item.water);
+                    }
+                    if (item.waste !== null) {
+                        transformed.waste.labels.push(timestamp);
+                        transformed.waste.values.push(item.waste);
+                    }
+                });
+
+                setChartData(transformed);
+            } catch (error) {
+                console.error('Error fetching chart data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchChartData();
+        // Refresh chart data every 5 minutes
+        const interval = setInterval(fetchChartData, 10 * 1000);
+        
+        return () => clearInterval(interval);
+    }, []);
 
     useEffect(() => {
         console.log('Attempting to connect to MQTT broker...');
@@ -106,21 +161,6 @@ const SensorDashboard = () => {
                     case 'sensor/water':
                         setWater(data);
                         // Add chart data update
-                        setWaterChartData(prevData => {
-                            const newLabels = [...(prevData.labels || []), new Date(data.timestamp).toLocaleTimeString()];
-                            const newValues = [...(prevData.values || []), Number(data.value) || 0];
-                            
-                            // Keep only last 6 data points
-                            if (newLabels.length > 6) {
-                                newLabels.shift();
-                                newValues.shift();
-                            }
-
-                            return {
-                                labels: newLabels,
-                                values: newValues
-                            };
-                        });
                         break;
                     case 'sensor/waste':
                         setWaste(data);
@@ -172,7 +212,6 @@ const SensorDashboard = () => {
                 client.end(true);
             }
             // Reset states on unmount
-            setWaterChartData({ labels: [], values: [] });
             setElectricity(null);
             setWater(null);
             setWaste(null);
@@ -180,15 +219,12 @@ const SensorDashboard = () => {
         };
     }, []);
 
-    // Only render chart if we have data
-    const shouldRenderChart = waterChartData.values.length > 0;
-
     return (
         <div className="p-4">
             <h2 className="text-xl font-bold mb-4">Sensor Dashboard</h2>
             
-            {/* Keep existing cards */}
-            <div className="flex gap-4">
+            {/* Keep existing real-time cards */}
+            <div className="flex gap-4 mb-6">
                 <div className="p-4 border rounded bg-blue-50">
                     <h3 className="font-semibold">Electricity</h3>
                     {electricity ? (
@@ -224,26 +260,54 @@ const SensorDashboard = () => {
                 </div>
             </div>
 
-            {/* Add water usage chart below existing cards */}
-            <div className="mt-6">
-            <div className="p-4 border rounded bg-white">
-                    {shouldRenderChart ? (
+            {/* Charts Grid */}
+            {isLoading ? (
+                <div className="h-[240px] flex items-center justify-center">
+                    <p>Loading chart data...</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="p-4 border rounded bg-white">
                         <StatisticsChart
-                            title="Water Usage Over Time"
-                            description="Real-time water consumption data"
-                            chart={waterChartConfig}
+                            title="Electricity Usage (kWh)"
+                            description="Historical consumption data"
+                            chart={createChartConfig(
+                                "Electricity",
+                                chartData.electricity,
+                                "kWH"
+                            )}
                             color="white"
                         />
-                    ) : (
-                        <div className="h-[240px] flex items-center justify-center">
-                            <p>Waiting for data...</p>
-                        </div>
-                    )}
+                    </div>
+                    <div className="p-4 border rounded bg-white">
+                        <StatisticsChart
+                            title="Water Usage (L)"
+                            description="Historical consumption data"
+                            chart={createChartConfig(
+                                "Water",
+                                chartData.water,
+                                "Litres"
+                            )}
+                            color="white"
+                        />
+                    </div>
+                    <div className="p-4 border rounded bg-white">
+                        <StatisticsChart
+                            title="Waste Amount (KG)"
+                            description="Historical generation data"
+                            chart={createChartConfig(
+                                "Waste",
+                                chartData.waste,
+                                "Kilograms"
+                            )}
+                            color="white"
+                        />
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {/* Keep connection status */}
-            <div className="mt-2">
+            {/* Connection status */}
+            <div className="mt-4">
                 <span className={`inline-block w-3 h-3 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`}></span>
                 <span className="ml-2 text-sm">{connected ? 'Connected' : 'Disconnected'}</span>
             </div>

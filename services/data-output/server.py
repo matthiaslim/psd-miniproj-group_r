@@ -60,7 +60,7 @@ def get_consumption_history():
                 SELECT * FROM consumption 
                 WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
                 ORDER BY timestamp DESC 
-                LIMIT 20
+                LIMIT 7
             """)
             results = cursor.fetchall()
             conn.close()
