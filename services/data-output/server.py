@@ -7,6 +7,7 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
+PORT = os.getenv('PORT', 3001)
 DB_CONFIG = {
     'host': os.getenv('DB_HOST', 'mysql'),
     'user': os.getenv('DB_USER', 'root'),
@@ -25,7 +26,7 @@ def get_db_connection():
         cursorclass=pymysql.cursors.DictCursor
     )
 
-@app.route('/api/consumption/latest', methods=['GET'])
+@app.route('/latest', methods=['GET'])
 def get_latest_consumption():
     try:
         conn = get_db_connection()
@@ -50,7 +51,7 @@ def get_latest_consumption():
         print(f"Error fetching latest consumption: {e}")
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/consumption/history', methods=['GET'])
+@app.route('/history', methods=['GET'])
 def get_consumption_history():
     try:
         conn = get_db_connection()
@@ -74,7 +75,7 @@ def get_consumption_history():
         print(f"Error fetching consumption history: {e}")
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/consumption/by-type/<type>', methods=['GET'])
+@app.route('/by-type/<type>', methods=['GET'])
 def get_consumption_by_type(type):
     valid_types = ['electricity', 'water', 'waste']
     if type not in valid_types:
@@ -102,4 +103,4 @@ def get_consumption_by_type(type):
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=PORT)

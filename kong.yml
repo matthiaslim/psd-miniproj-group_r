@@ -11,6 +11,15 @@ services:
           - /api/auth
         strip_path: true
 
+  # Data Output Service - Handles data output requests
+  - name: data-output
+    url: http://data-output:3001
+    routes:
+      - name: data-output-routes
+        paths:
+          - /api/consumption
+        strip_path: true
+
   # Prediction Service - Handles prediction requests
   - name: prediction-service
     url: http://prediction-service:3002

@@ -54,6 +54,23 @@ services:
       - kong
       - mysql
 
+  data-output:
+    build:
+      context: ./services/data-output
+    restart: always
+    environment:
+      PORT: 3001
+      DB_HOST: "mysql"
+      DB_PORT: 3306
+      DB_USER: "root"
+      DB_PASS: "admin"
+      DB_NAME: "sustainable_consumption"
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mysql
+      - kong
+
   prediction-service:
     build: ./services/prediction-service
     restart: always
