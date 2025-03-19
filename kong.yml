@@ -26,6 +26,20 @@ services:
         secret_is_base64: false
         claims_to_verify:
           - "exp"
+  - name: mqtt-websocket-service
+    url: http://mosquitto:9001
+    routes:
+      - name: realtime
+        paths:
+          - /api/realtime
+        strip_path: true
+        protocols:
+          - http
+          - https
+        attributes:
+          proxy_read_timeout: 3600000
+          proxy_send_timeout: 3600000
+          proxy_connect_timeout: 3600000
 
 consumers:
   - username: default
