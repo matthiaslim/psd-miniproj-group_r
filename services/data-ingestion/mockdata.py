@@ -54,14 +54,14 @@ try:
         )
 
         water_usage = generate_reading(
-            normal_range=(10, 100), 
-            anomaly_range=(0, 10000), 
+            normal_range=(10, 50), 
+            anomaly_range=(0, 100000), 
             anomaly_chance=0.05
         )
         
         waste_usage = generate_reading(
             normal_range=(10, 1000), 
-            anomaly_range=(0, 10000), 
+            anomaly_range=(0, 100000), 
             anomaly_chance=0.05
         )
 

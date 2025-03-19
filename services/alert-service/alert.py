@@ -45,11 +45,11 @@ client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 
 def calculate_z_score(column, value):
     """ Fetch recent data, compute Z-score, and check for anomalies """
-    cursor.execute(f"SELECT {column} FROM consumption ORDER BY id DESC LIMIT 100")
+    cursor.execute(f"SELECT {column} FROM consumption ORDER BY id DESC LIMIT 50")
     data = [float(row[0]) for row in cursor.fetchall()]
     print(f"Latest data: {data[:10]}")  # Print the first 10 values
 
-    if len(data) >= 100:
+    if len(data) >= 50:
         mean = np.mean(data)
         std_dev = np.std(data)
         

@@ -126,15 +126,15 @@ const SensorDashboard = () => {
                         setWaste(data);
                         break;
                     case 'alerts':
-                        console.log('Received alert:', message.data);
-                        toast.error(`🚨 Anomaly detected in ${message.data.column}: ${message.data.value}`, { 
+                        console.log('Received alert:', data);
+                        toast.error(`🚨 Anomaly detected in ${data.column}: ${data.value}`, { 
                             position: "top-right",
                             autoClose: 5000,
                             hideProgressBar: false,
                             closeOnClick: true,
                             pauseOnHover: true,
                             draggable: true,
-                            theme: "white",
+                            theme: "dark",
                         });
                         break;
                     default:
