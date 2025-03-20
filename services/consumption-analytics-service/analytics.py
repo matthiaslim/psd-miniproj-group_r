@@ -23,7 +23,7 @@ def get_db_connection():
         database=os.getenv("DB_NAME", "sustainable_consumption"),
     )
 
-@app.get("/api/consumption-analytics/{column}", response_model=List[dict])
+@app.get("/{column}", response_model=List[dict])
 async def get_analytics(column: str):
     try:
         conn = get_db_connection()
@@ -43,7 +43,7 @@ async def get_analytics(column: str):
         # If an error occurs, raise an HTTP exception
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/consumption-analytics/{range}/{column}", response_model=List[dict])
+@app.get("/{range}/{column}", response_model=List[dict])
 async def get_analytics_range(range: str, column: str):
     now = datetime.now()
     try:

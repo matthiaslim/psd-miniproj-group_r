@@ -8,7 +8,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the script
-COPY database.py ./
+COPY analytics.py ./
 
 # Command to run the script
-CMD ["python", "database.py"]
+CMD ["python", "analytics.py"]

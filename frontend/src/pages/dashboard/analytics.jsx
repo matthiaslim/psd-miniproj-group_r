@@ -142,7 +142,7 @@ export function Analytics() {
 
   const fetchData = async (column, range) => {
     try {
-      const response = await axios.get(`http://localhost:3003/api/consumption-analytics/${range}/${column}`);
+      const response = await axios.get(`http://localhost:8000/api/analytics/${range}/${column}`);
 
       console.log(response.data);
 
@@ -185,7 +185,7 @@ export function Analytics() {
   const loadData = async (column) => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:3003/api/consumption-analytics/${column}`);
+      const response = await axios.get(`http://localhost:8000/api/analytics/${column}`);
       const data = response.data;
 
       let highest = { value: -Infinity, timestamp: null };

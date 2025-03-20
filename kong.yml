@@ -41,7 +41,8 @@ services:
     routes:
       - name: consumption-analytics-routes
         paths:
-          - /api/consumption-analytics/*
+          - /api/analytics
+        strip_path: true
 
   - name: mqtt-websocket-service
     url: http://mosquitto:9001
