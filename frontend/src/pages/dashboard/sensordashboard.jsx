@@ -1,5 +1,5 @@
 // src/widgets/SensorDashboard.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import mqtt from "mqtt";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,7 +18,8 @@ const SensorDashboard = () => {
         waste: { labels: [], values: [] }
     });
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const clientRef = useRef(null);
+    const connectionTimerRef = useRef(null);
 
     // Initialize chart config with null check and for each metric
     const createChartConfig = (title, data, yAxisTitle) => ({
@@ -60,7 +61,20 @@ const SensorDashboard = () => {
         }
     });
 
+    const showAlert = (data) => {
+        
+        toast.error(`🚨 Anomaly detected in ${data.column}: ${data.value}`, { 
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "dark",
+            toastId: `alert-${Date.now()}`, // Add unique ID
+        });
     
+    };
 
     // Add useEffect for fetching chart data
     useEffect(() => {
@@ -115,7 +129,7 @@ const SensorDashboard = () => {
 
     useEffect(() => {
         console.log('Attempting to connect to MQTT broker...');
-        const client = mqtt.connect('ws://localhost:8000/api/realtime', {
+        clientRef.current = mqtt.connect('ws://localhost:8000/api/realtime', {
             reconnectPeriod: 1000,
             connectTimeout: 30000,
             keepalive: 60, // Add this - sends ping every 60 seconds
@@ -123,11 +137,12 @@ const SensorDashboard = () => {
             clientId: 'dashboard_' + Math.random().toString(16).substr(2, 8)
         });
 
+        const client = clientRef.current;
+
         // Connection monitoring
-        let connectionTimer;
         const startConnectionTimer = () => {
-            clearTimeout(connectionTimer);
-            connectionTimer = setTimeout(() => {
+            clearTimeout(connectionTimerRef.current);
+            connectionTimerRef.current = setTimeout(() => {
                 console.log('Connection timeout - reconnecting...');
                 setConnected(false);
                 client.reconnect();
@@ -167,15 +182,7 @@ const SensorDashboard = () => {
                         break;
                     case 'alerts':
                         console.log('Received alert:', data);
-                        toast.error(`🚨 Anomaly detected in ${data.column}: ${data.value}`, { 
-                            position: "top-right",
-                            autoClose: 5000,
-                            hideProgressBar: false,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
-                            theme: "dark",
-                        });
+                        showAlert(data);
                         break;
                     default:
                         console.log('Unknown topic:', topic);
@@ -208,16 +215,22 @@ const SensorDashboard = () => {
         });
 
         return () => {
+            clearTimeout(connectionTimerRef.current);
             if (client) {
+                // Unsubscribe from alerts before unmounting
+                client.unsubscribe(['sensor/electricity', 'sensor/water', 'sensor/waste', 'alerts']);
                 client.end(true);
+                setConnected(false);
             }
-            // Reset states on unmount
-            setElectricity(null);
-            setWater(null);
-            setWaste(null);
-            setConnected(false);
+            toast.dismiss();
+            // // Reset states on unmount
+            // setElectricity(null);
+            // setWater(null);
+            // setWaste(null);
+            // setConnected(false);
         };
     }, []);
+
 
     // return (
     //     <div className="p-4">
