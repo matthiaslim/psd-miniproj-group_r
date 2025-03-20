@@ -7,7 +7,7 @@ services:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_DATABASE: sustainable_consumption
     ports:
-      - "3307:3306"
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -101,7 +101,7 @@ services:
     depends_on:
       - kong
       - mysql
-      
+
   data-ingestion:
     build:
       context: ./services/data-ingestion
@@ -131,6 +131,14 @@ services:
       - DB_NAME=sustainable_consumption
       - MQTT_BROKER=mosquitto
       - MQTT_PORT=1883
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - kong
 
 volumes:
   mosquitto_data:
