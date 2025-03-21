@@ -52,10 +52,14 @@ async def get_analytics_range(range: str, column: str):
         
         if range == "daily":
             query = f"""
-                SELECT timestamp, {column} 
+                SELECT 
+                    DATE_FORMAT(FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(timestamp) / 300) * 300), '%Y-%m-%dT%H:%i:%sZ') as formatted_timestamp,
+                    AVG({column}) as {column}
                 FROM consumption 
                 WHERE timestamp >= '{now.strftime('%Y-%m-%d')} 00:00:00' 
                 AND timestamp <= '{now.strftime('%Y-%m-%d')} 23:59:59'
+                GROUP BY formatted_timestamp
+                ORDER BY formatted_timestamp
             """
         elif range == "weekly":
             week_start = now - timedelta(days=now.weekday())  

@@ -146,7 +146,7 @@ export function Configurator() {
             />
           </div>
           <hr />
-          <div className="my-8 flex flex-col gap-4">
+          {/* <div className="my-8 flex flex-col gap-4">
             <a
               href="https://www.creative-tim.com/product/material-tailwind-dashboard-react?rel=mtdr"
               target="_black"
@@ -225,7 +225,7 @@ export function Configurator() {
               <i className="fa-brands fa-facebook text-white" />
               Share
             </Button>
-          </div>
+          </div> */}
         </div>
       </div>
     </aside>

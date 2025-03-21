@@ -51,7 +51,7 @@ export function Analytics() {
       charts: [
         {
           title: "Energy Consumption",
-          description: "Daily energy usage in kWh",
+          description: `${timeRange.charAt(0).toUpperCase() + timeRange.slice(1)} energy usage in kWh`,
           chart: {
             type: "line",
             height: 220,
@@ -87,7 +87,7 @@ export function Analytics() {
       charts: [
         {
           title: "Water Consumption",
-          description: "Daily water usage in liters",
+          description: `${timeRange.charAt(0).toUpperCase() + timeRange.slice(1)} water usage in liters`,
           chart: {
             type: "line",
             height: 220,
@@ -116,7 +116,7 @@ export function Analytics() {
       charts: [
         {
           title: "Material Usage",
-          description: "Monthly material consumption",
+          description: `${timeRange.charAt(0).toUpperCase() + timeRange.slice(1)} material consumption in kg`,
           chart: {
             type: "bar",
             height: 220,
@@ -157,7 +157,7 @@ export function Analytics() {
       else
         setCategoriesValue(
           response.data.map(item => {
-            const time = new Date(item.timestamp);
+            const time = new Date(item.formatted_timestamp);
             return time.toLocaleTimeString('en-GB');
           })
         );
@@ -269,207 +269,6 @@ export function Analytics() {
     loadData();
   }, [timeRange, selectedTab]);
 
-
-
-
-  // return (
-  //   <div className="mt-12">
-  //     <Card className="mb-6">
-  //       <CardBody>
-  //         <div className="mb-4 grid grid-cols-1 gap-6">
-  //           <Select 
-  //             label="Time Range" 
-  //             value={timeRange}
-  //             onChange={(value) => setTimeRange(value)}
-  //           >
-  //               <Option value="daily">Daily</Option>
-  //              <Option value="weekly">Weekly</Option>
-  //              <Option value="monthly">Monthly</Option>
-
-  //           </Select>
-  //         </div>
-  //       </CardBody>
-  //     </Card>
-
-  //     <Tabs value={selectedTab} onChange={setSelectedTab}>
-
-  //     <TabsHeader>
-  //       {resourceTypes.map(({ label, value }) => (
-  //         <Tab key={value} value={value}>
-  //           {label}
-  //         </Tab>
-  //       ))}
-  //     </TabsHeader>
-  //     <TabsBody>
-  //       {resourceTypes.map(({ value, charts }) => (
-  //         <TabPanel key={value} value={value}>
-  //          <div className="mb-6">
-  //             <Typography variant="h5" color="blue-gray" className="mb-4 text-center">
-  //               Key Statistics
-  //             </Typography>
-
-  //             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-  //               {/* Electricity Statistics Card */}
-  //               <Card className="shadow-lg">
-  //                 <CardBody>
-  //                   <div className="flex items-center gap-4 mb-4">
-  //                     <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
-  //                       <i className="fas fa-bolt text-blue-500 text-2xl"></i>
-  //                     </div>
-  //                     <Typography variant="h6" color="blue-gray">
-  //                       Electricity
-  //                     </Typography>
-  //                   </div>
-  //                   <div className="space-y-3">
-  //                     <div>
-  //                       <Typography variant="small" className="font-semibold text-blue-gray-600">
-  //                         Highest Consumption
-  //                       </Typography>
-  //                       <Typography className="text-lg font-bold">
-  //                         {highestValue.electricity.value} kWh
-  //                       </Typography>
-  //                       <Typography variant="small" className="text-blue-gray-500">
-  //                         at {highestValue.electricity.timestamp}
-  //                       </Typography>
-  //                     </div>
-  //                     <div>
-  //                       <Typography variant="small" className="font-semibold text-blue-gray-600">
-  //                         Lowest Consumption
-  //                       </Typography>
-  //                       <Typography className="text-lg font-bold">
-  //                         {lowestValue.electricity.value} kWh
-  //                       </Typography>
-  //                       <Typography variant="small" className="text-blue-gray-500">
-  //                         at {lowestValue.electricity.timestamp}
-  //                       </Typography>
-  //                     </div>
-  //                     <div>
-  //                       <Typography variant="small" className="font-semibold text-blue-gray-600">
-  //                         Average Consumption
-  //                       </Typography>
-  //                       <Typography className="text-lg font-bold">
-  //                         {averageConsumption.averageElectricity} kWh
-  //                       </Typography>
-  //                     </div>
-  //                   </div>
-  //                 </CardBody>
-  //               </Card>
-
-  //               {/* Water Statistics Card */}
-  //               <Card className="shadow-lg">
-  //                 <CardBody>
-  //                   <div className="flex items-center gap-4 mb-4">
-  //                     <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
-  //                       <i className="fas fa-tint text-blue-500 text-2xl"></i>
-  //                     </div>
-  //                     <Typography variant="h6" color="blue-gray">
-  //                       Water
-  //                     </Typography>
-  //                   </div>
-  //                   <div className="space-y-3">
-  //                     <div>
-  //                       <Typography variant="small" className="font-semibold text-blue-gray-600">
-  //                         Highest Consumption
-  //                       </Typography>
-  //                       <Typography className="text-lg font-bold">
-  //                         {highestValue.water.value} L
-  //                       </Typography>
-  //                       <Typography variant="small" className="text-blue-gray-500">
-  //                         at {highestValue.water.timestamp}
-  //                       </Typography>
-  //                     </div>
-  //                     <div>
-  //                       <Typography variant="small" className="font-semibold text-blue-gray-600">
-  //                         Lowest Consumption
-  //                       </Typography>
-  //                       <Typography className="text-lg font-bold">
-  //                         {lowestValue.water.value} L
-  //                       </Typography>
-  //                       <Typography variant="small" className="text-blue-gray-500">
-  //                         at {lowestValue.water.timestamp}
-  //                       </Typography>
-  //                     </div>
-  //                     <div>
-  //                       <Typography variant="small" className="font-semibold text-blue-gray-600">
-  //                         Average Consumption
-  //                       </Typography>
-  //                       <Typography className="text-lg font-bold">
-  //                         {averageConsumption.averageWater} L
-  //                       </Typography>
-  //                     </div>
-  //                   </div>
-  //                 </CardBody>
-  //               </Card>
-
-  //               {/* Waste Statistics Card */}
-  //               <Card className="shadow-lg">
-  //                 <CardBody>
-  //                   <div className="flex items-center gap-4 mb-4">
-  //                     <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
-  //                       <i className="fas fa-trash text-blue-500 text-2xl"></i>
-  //                     </div>
-  //                     <Typography variant="h6" color="blue-gray">
-  //                       Waste
-  //                     </Typography>
-  //                   </div>
-  //                   <div className="space-y-3">
-  //                     <div>
-  //                       <Typography variant="small" className="font-semibold text-blue-gray-600">
-  //                         Highest Amount
-  //                       </Typography>
-  //                       <Typography className="text-lg font-bold">
-  //                         {highestValue.waste.value} Kg
-  //                       </Typography>
-  //                       <Typography variant="small" className="text-blue-gray-500">
-  //                         at {highestValue.waste.timestamp}
-  //                       </Typography>
-  //                     </div>
-  //                     <div>
-  //                       <Typography variant="small" className="font-semibold text-blue-gray-600">
-  //                         Lowest Amount
-  //                       </Typography>
-  //                       <Typography className="text-lg font-bold">
-  //                         {lowestValue.waste.value} Kg
-  //                       </Typography>
-  //                       <Typography variant="small" className="text-blue-gray-500">
-  //                         at {lowestValue.waste.timestamp}
-  //                       </Typography>
-  //                     </div>
-  //                     <div>
-  //                       <Typography variant="small" className="font-semibold text-blue-gray-600">
-  //                         Average Amount
-  //                       </Typography>
-  //                       <Typography className="text-lg font-bold">
-  //                         {averageConsumption.averageWaste} Kg
-  //                       </Typography>
-  //                     </div>
-  //                   </div>
-  //                 </CardBody>
-  //               </Card>
-  //             </div>
-  //           </div>
-  //           <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-1">
-  //             {charts.map((props, index) => (
-  //               <StatisticsChart
-  //                 key={index}
-  //                 {...props}
-  //                 footer={
-  //                   <Typography
-  //                     variant="small"
-  //                     className="flex items-center font-normal text-blue-gray-600"
-  //                   >
-  //                     {loading ? "Loading..." : "Updated just now"}
-  //                   </Typography>
-  //                 }
-  //               />
-  //             ))}
-  //           </div>
-  //         </TabPanel>
-  //       ))}
-  //     </TabsBody>
-  //   </Tabs>
-  //   </div>
-  // );
   return (
     <div className="mt-12">
       {/* Page Header */}
@@ -748,6 +547,9 @@ export function Analytics() {
                                   className="font-normal text-blue-gray-600"
                                 >
                                   {loading ? "Loading..." : "Updated just now"}
+                                </Typography>
+                                <Typography variant="small" className="text-blue-gray-500">
+                                  {timeRange === "daily" ? "Data points shown in 5-minute intervals" : ""}
                                 </Typography>
                               </div>
                             }
